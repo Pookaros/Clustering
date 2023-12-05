@@ -4,9 +4,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+
+# The path of the project
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 
 # Importing the dataset
-dataset = pd.read_csv(r'')
+dataset = pd.read_csv(os.path.join(__location__, "Mall_customers.csv"))
 X = dataset.iloc[:, [3, 4]].values
 
 # Using the dendrogram to find the optimal number of clusters
@@ -17,33 +22,47 @@ plt.xlabel('Customers')
 plt.ylabel('Euclidean distances')
 plt.show()
 
-#truncate function, rounding up numbers to avoid losing good no. of cluster choices
-def truncate(n, decimals=0):
-    multiplier = 10 ** decimals
-    return int(n * multiplier) / multiplier
 
-#automating the selection process of the optimal number of clusters using the dendrogram
-#there could actualy be more than one optimal number of clusters
-l=[]
-l_1=[]
-res=[]
-for i in range(1, len(dendrogram['dcoord'])):
-    l.append(truncate(dendrogram['dcoord'][i][1]))
-    l_1.append([truncate(dendrogram['dcoord'][i][0]),truncate(dendrogram['dcoord'][i][1]),truncate(dendrogram['dcoord'][i][2]),truncate(dendrogram['dcoord'][i][3])])
-l_sort=(sorted(l))
-selector = [l_sort[i+1] - l_sort[i] for i in range(len(l) - 1)]
+### custom 
+branches_heights = []
+branches_width_height = []
+res = []
+
+# It contains the list of (x_coord_left, y_coord, y_coord, x_coord_right) of the branch
+branches_width_height = [[round(dendrogram['dcoord'][i][0], 3),
+                          round(dendrogram['dcoord'][i][1], 3),
+                          round(dendrogram['dcoord'][i][2], 3),
+                          round(dendrogram['dcoord'][i][3], 3)] for i in range(1, len(dendrogram['dcoord']))]
+
+# It contains only the height of eachs branch
+branches_heights = [element[1] for element in branches_width_height]
+
+# Sorted
+branches_heights_sorted = (sorted(branches_heights))
+
+# Selector is a list that contains the differences between the ordered heights
+selector = [branches_heights_sorted[i+1] - branches_heights_sorted[i] for i in range(len(branches_heights) - 1)]
+print(selector)
+# and we take the maximum of them
 temp = max(selector)
+
+# determine the list of the thresholds for making the clusters
 ress = [i for i, j in enumerate(selector) if j == temp]
 
-for j in range(0,len(ress)):
-    flag=0
-    for i in range(0,len(l_1)-1):
-        if l_1[i][0] < l_sort[ress[j]]+1 and l_1[i][1] > l_sort[ress[j]]+1:
-            flag=flag+1
-            if l_1[i][2] > l_sort[ress[j]]+1 and l_1[i][3] < l_sort[ress[j]]+1:
-                flag=flag+1
+
+for j in range(0, len(ress)):
+    flag = 0
+    for i in range(0, len(branches_width_height)):
+
+        if (branches_width_height[i][0] < branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][1] > branches_heights_sorted[ress[j]]*3/2) and not(branches_width_height[i][2] > branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][3] < branches_heights_sorted[ress[j]]*3/2):
+            flag = flag+1
+
+        elif (branches_width_height[i][2] > branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][3] < branches_heights_sorted[ress[j]]*3/2) and not(branches_width_height[i][0] < branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][1] > branches_heights_sorted[ress[j]]*3/2):
+            flag = flag+1
+
+        elif (branches_width_height[i][2] > branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][3] < branches_heights_sorted[ress[j]]*3/2) and (branches_width_height[i][0] < branches_heights_sorted[ress[j]]*3/2 and branches_width_height[i][1] > branches_heights_sorted[ress[j]]*3/2):
+            flag = flag+2
     res.append(flag)
-# print(res)
 
 
 # Training the Hierarchical Clustering model on the dataset

@@ -2,10 +2,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.cluster.hierarchy as sch
 from random import randint
+import os 
+
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 # Importing the dataset
-dataset = pd.read_csv(r'C:\Users\Pookaros\Desktop\george\ML DL AI\breast cancer\wdbc.data')
+dataset = pd.read_csv(os.path.join(__location__, "wdbc.data"))
 X = dataset.iloc[:, [2,5,7]].values
-print(X)
 
 
 # Using the elbow method to find the optimal number of clusters
@@ -22,9 +25,6 @@ selector = [wcss[i] - wcss[i+1] for i in range(len(wcss) - 1)]
 selector_2 = [selector[i] - selector[i+1] for i in range(len(selector) - 1)]
 temp = min(selector_2)
 res = [i for i, j in enumerate(selector_2) if j == temp]
-# print(selector)
-# print(selector_2)
-# print(res)
 
 plt.plot(range(1, 11), wcss)
 plt.title('The Elbow Method')
@@ -51,6 +51,3 @@ for i in range(0, len(res)):
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
     plt.show()
-    # import mayavi.mlab as mylab
-    #     mylab.points3d(X[y_hc == j, 0], X[y_hc == j, 1], X[y_hc == j, 2])
-    #     mylab.show()
