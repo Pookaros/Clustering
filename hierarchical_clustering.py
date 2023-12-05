@@ -34,13 +34,6 @@ l_sort=(sorted(l))
 selector = [l_sort[i+1] - l_sort[i] for i in range(len(l) - 1)]
 temp = max(selector)
 ress = [i for i, j in enumerate(selector) if j == temp]
-# print(ress)
-# print(l_sort)
-# print(l_sort[ress[0]])
-# print(l)
-# print(l_1)
-# print(selector)
-# print(temp)
 
 for j in range(0,len(ress)):
     flag=0
